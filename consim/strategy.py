@@ -80,30 +80,7 @@ class HalvingStrategy(BaseStrategy):
         return self.current_weights
 
 
-class EpsilonGreedyTopKStrategy(BaseStrategy):
-    def __init__(self, epsilon, decay_power=1):
-        self.epsilon = epsilon
-        self.decay_power = decay_power
-
-    def step(self, ctx: StepContext):
-        if np.array_equiv(ctx.max_weight, ctx.max_weight[0]):
-            k = int(np.round(1 / ctx.max_weight[0]))
-        else:
-            raise RuntimeError("All max weights should have same value")
-        epsilon = min(1, self.epsilon / np.power((ctx.time + 1), self.decay_power))
-        leader_weight = (1 - epsilon) / k
-        non_leader_weight = epsilon / (ctx.N - k)
-        if leader_weight > non_leader_weight:
-            weights = np.full(ctx.N, non_leader_weight)
-            # Indexes of retained sources, get last k
-            idx = np.argpartition(ctx.total_cr, ctx.N - k)[-k:]
-            weights[idx] = leader_weight
-        else:
-            weights = ctx.equal_weights
-        return weights
-
-
-class EpsilonGreedyStrategy(BaseStrategy):
+class EpsilonDecreasingStrategy(BaseStrategy):
     def __init__(self, epsilon):
         self.epsilon = epsilon
 

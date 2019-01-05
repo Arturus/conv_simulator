@@ -1,12 +1,12 @@
 from typing import Collection, Callable
 from typing import NamedTuple
 
-import mkl_random
 import numba
 import numpy as np
 from joblib import Parallel, delayed
 from tqdm import trange, tnrange
 
+from .rnd import rand
 from .strategy import BaseStrategy
 from .util import distribute_equal_weight
 
@@ -153,11 +153,11 @@ def simulation_round(n, max_days, visits_per_day, strategy, sp: SourceParams, st
     latent_cr = np.empty((max_days, n))
     context = StepContext(sp.initial_visits, sp.initial_conversions, sp.max_weight)
     for day in range(max_days):
-        visits = mkl_random.poisson(weights * visits_per_day)
+        visits = rand.poisson(weights * visits_per_day)
         conv_rates = sp.true_conversion()
         latent_cr[day] = conv_rates
         # noinspection PyTypeChecker
-        conversions = mkl_random.binomial(visits, conv_rates)
+        conversions = rand.binomial(visits, conv_rates)
         # If poisson and binomial samplers works correctly, then no real need to calculate CR from samples.
         # We can calculate it from latent values to reduce variance.
         # observed_cr[day] = conversions.sum() / visits.sum()

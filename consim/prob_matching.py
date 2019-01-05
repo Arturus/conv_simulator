@@ -1,7 +1,7 @@
-import mkl_random
 import numba
 import numpy as np
 
+from .rnd import rand
 from .strategy import BaseStrategy, StepContext
 from .util import best_weights
 
@@ -76,7 +76,7 @@ class ProbMatchingStrategy(BaseStrategy):
             cp.random.seed()
             x = cp.random.beta(a, b, size=sample_size, dtype=cp.float32).get()
         elif self.sampler == 'mkl':
-            x = mkl_random.beta(a, b, sample_size)
+            x = rand.beta(a, b, sample_size)
         elif self.sampler == 'numpy':
             x = np.random.beta(a, b, sample_size)
         else:

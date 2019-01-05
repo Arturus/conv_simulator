@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
-import mkl_random
 import numpy as np
 from scipy.stats import norm
+
+from .rnd import rand
 
 
 class ConversionDistribution(ABC):
@@ -64,7 +65,7 @@ class RandomDrift:
         self.clip_max = clip_max
 
     def __call__(self):
-        drift = mkl_random.normal((self.original_values - self.current_state) * self.eta, self.sigma)
+        drift = rand.normal((self.original_values - self.current_state) * self.eta, self.sigma)
         self.current_state = np.clip(self.current_state + drift, None, self.clip_max)
         return np.exp(self.current_state)
 
@@ -74,7 +75,7 @@ class DecayingConversion:
         self.current_state = initial_state
         self.lamb = lamb
         self.n_days = n_days
-        decays = mkl_random.exponential(self.lamb, size=len(initial_state)) + 1
+        decays = rand.exponential(self.lamb, size=len(initial_state)) + 1
         self.decay_k = np.power(1 / decays, 1 / self.n_days)
         self.decay_k += 0
 
